@@ -1,8 +1,8 @@
 import { teachers, useAITeacher } from "@/hooks/useAITeacher";
 
 export const BoardSettings = () => {
-  const furigana = useAITeacher((state) => state.furigana);
-  const setFurigana = useAITeacher((state) => state.setFurigana);
+  const hindi = useAITeacher((state) => state.hindi);
+  const sethindi = useAITeacher((state) => state.sethindi);
 
   const english = useAITeacher((state) => state.english);
   const setEnglish = useAITeacher((state) => state.setEnglish);
@@ -84,13 +84,13 @@ export const BoardSettings = () => {
       <div className="absolute right-0 top-full flex flex-row gap-2 mt-20">
         <button
           className={` ${
-            furigana
+            hindi
               ? "text-white bg-slate-900/40 "
               : "text-white/45 bg-slate-700/20 "
           } py-4 px-10 text-4xl rounded-full transition-colors duration-500 backdrop-blur-md`}
-          onClick={() => setFurigana(!furigana)}
+          onClick={() => sethindi(!hindi)}
         >
-          Furigana
+          hindi
         </button>
         <button
           className={`${

@@ -1,174 +1,60 @@
-import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env["OPENAI_API_KEY"], // This is the default and can be omitted
-});
 
-const formalExample = {
-  japanese: [
-    { word: "日本", reading: "にほん" },
-    { word: "に" },
-    { word: "住んで", reading: "すんで" },
-    { word: "います" },
-    { word: "か" },
-    { word: "?" },
-  ],
-  grammarBreakdown: [
-    {
-      english: "Do you live in Japan?",
-      japanese: [
-        { word: "日本", reading: "にほん" },
-        { word: "に" },
-        { word: "住んで", reading: "すんで" },
-        { word: "います" },
-        { word: "か" },
-        { word: "?" },
-      ],
-      chunks: [
-        {
-          japanese: [{ word: "日本", reading: "にほん" }],
-          meaning: "Japan",
-          grammar: "Noun",
-        },
-        {
-          japanese: [{ word: "に" }],
-          meaning: "in",
-          grammar: "Particle",
-        },
-        {
-          japanese: [{ word: "住んで", reading: "すんで" }, { word: "います" }],
-          meaning: "live",
-          grammar: "Verb + て form + います",
-        },
-        {
-          japanese: [{ word: "か" }],
-          meaning: "question",
-          grammar: "Particle",
-        },
-        {
-          japanese: [{ word: "?" }],
-          meaning: "question",
-          grammar: "Punctuation",
-        },
-      ],
-    },
-  ],
-};
 
-const casualExample = {
-  japanese: [
-    { word: "日本", reading: "にほん" },
-    { word: "に" },
-    { word: "住んで", reading: "すんで" },
-    { word: "いる" },
-    { word: "の" },
-    { word: "?" },
-  ],
-  grammarBreakdown: [
-    {
-      english: "Do you live in Japan?",
-      japanese: [
-        { word: "日本", reading: "にほん" },
-        { word: "に" },
-        { word: "住んで", reading: "すんで" },
-        { word: "いる" },
-        { word: "の" },
-        { word: "?" },
-      ],
-      chunks: [
-        {
-          japanese: [{ word: "日本", reading: "にほん" }],
-          meaning: "Japan",
-          grammar: "Noun",
-        },
-        {
-          japanese: [{ word: "に" }],
-          meaning: "in",
-          grammar: "Particle",
-        },
-        {
-          japanese: [{ word: "住んで", reading: "すんで" }, { word: "いる" }],
-          meaning: "live",
-          grammar: "Verb + て form + いる",
-        },
-        {
-          japanese: [{ word: "の" }],
-          meaning: "question",
-          grammar: "Particle",
-        },
-        {
-          japanese: [{ word: "?" }],
-          meaning: "question",
-          grammar: "Punctuation",
-        },
-      ],
-    },
-  ],
-};
+// import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function GET(req) {
-  // WARNING: Do not expose your keys
-  // WARNING: If you host publicly your project, add an authentication layer to limit the consumption of ChatGPT resources
+// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-  const speech = req.nextUrl.searchParams.get("speech") || "formal";
-  const speechExample = speech === "formal" ? formalExample : casualExample;
+// export async function GET(req) {
+//   const question = req.nextUrl.searchParams.get("question") || "What is AI?";
+//   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+//   const result = await model.generateContent(question);
+//   return Response.json({ answer: result.response.text() });
+// }
 
-  const chatCompletion = await openai.chat.completions.create({
-    messages: [
-      {
-        role: "system",
-        content: `You are a Japanese language teacher. 
-Your student asks you how to say something from english to japanese.
-You should respond with: 
-- english: the english version ex: "Do you live in Japan?"
-- japanese: the japanese translation in split into words ex: ${JSON.stringify(
-          speechExample.japanese
-        )}
-- grammarBreakdown: an explanation of the grammar structure per sentence ex: ${JSON.stringify(
-          speechExample.grammarBreakdown
-        )}
-`,
-      },
-      {
-        role: "system",
-        content: `You always respond with a JSON object with the following format: 
-        {
-          "english": "",
-          "japanese": [{
-            "word": "",
-            "reading": ""
-          }],
-          "grammarBreakdown": [{
-            "english": "",
-            "japanese": [{
-              "word": "",
-              "reading": ""
-            }],
-            "chunks": [{
-              "japanese": [{
-                "word": "",
-                "reading": ""
-              }],
-              "meaning": "",
-              "grammar": ""
-            }]
-          }]
-        }`,
-      },
-      {
-        role: "user",
-        content: `How to say ${
-          req.nextUrl.searchParams.get("question") ||
-          "Have you ever been to Japan?"
-        } in Japanese in ${speech} speech?`,
-      },
-    ],
-    // model: "gpt-4-turbo-preview", // https://platform.openai.com/docs/models/gpt-4-and-gpt-4-turbo
-    model: "gpt-3.5-turbo", // https://help.openai.com/en/articles/7102672-how-can-i-access-gpt-4
-    response_format: {
-      type: "json_object",
-    },
-  });
-  console.log(chatCompletion.choices[0].message.content);
-  return Response.json(JSON.parse(chatCompletion.choices[0].message.content));
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const API_KEY = process.env.GEMINI_API_KEY; // Explicitly fetching API key
+
+if (!API_KEY) {
+  console.error("❌ ERROR: Google Gemini API key is missing. Set it in .env.local");
 }
+
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+export async function POST(req) {  
+  try {
+    const { question, language } = await req.json();
+    console.log("🔹 AI Request Received:", { question, language });
+
+    if (!question) {
+      console.log("❌ Error: No question received!");
+      return new Response(JSON.stringify({ error: "Question is required" }), { status: 400 });
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    let prompt = question;
+    if (language === "hindi") {
+      prompt = `Translate this response to Hindi: ${question}`;
+    }
+
+    const result = await model.generateContent(prompt);
+    console.log("🔹 Raw API Response:", result);
+
+    if (!result || !result.response || !result.response.candidates || result.response.candidates.length === 0) {
+      console.error("❌ Error: Invalid Gemini API Response!");
+      return new Response(JSON.stringify({ answer: "No response available." }), { status: 500 });
+    }
+
+    const answer = result.response.candidates[0].content.parts[0].text;
+    console.log("✅ AI Answer Generated:", answer);
+    return Response.json({ answer });
+
+  } catch (error) {
+    console.error("❌ Gemini API Error:", error);
+    return new Response(JSON.stringify({ error: "Error generating response" }), { status: 500 });
+  }
+}
+
+
