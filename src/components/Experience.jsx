@@ -11,7 +11,7 @@ import {
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Leva, button, useControls } from "leva";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { degToRad } from "three/src/math/MathUtils";
 import { BoardSettings } from "./BoardSettings";
 import { MessagesList } from "./MessagesList";
@@ -44,6 +44,19 @@ const itemPlacement = {
 export const Experience = () => {
   const teacher = useAITeacher((state) => state.teacher);
   const classroom = useAITeacher((state) => state.classroom);
+  const [webgl, setWebgl] = useState(null);
+
+  useEffect(() => {
+    try {
+      const canvas = document.createElement("canvas");
+      setWebgl(Boolean(canvas.getContext("webgl2") || canvas.getContext("webgl")));
+    } catch {
+      setWebgl(false);
+    }
+  }, []);
+
+  if (webgl === false) return <TextFallback />;
+  if (webgl === null) return <main className="min-h-screen bg-slate-900" />;
 
   return (
     <>
@@ -87,6 +100,37 @@ export const Experience = () => {
         </Suspense>
       </Canvas>
     </>
+  );
+};
+
+const TextFallback = () => {
+  const messages = useAITeacher((state) => state.messages);
+  const playMessage = useAITeacher((state) => state.playMessage);
+  const hindi = useAITeacher((state) => state.hindi);
+  const sethindi = useAITeacher((state) => state.sethindi);
+  const setEnglish = useAITeacher((state) => state.setEnglish);
+
+  return (
+    <main className="min-h-screen bg-slate-900 text-white p-5 pb-48">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold">AI Tutor</h1>
+        <p className="text-white/70 mt-2">The 3D classroom needs WebGL. You can still ask questions here.</p>
+        <div className="flex gap-3 mt-5">
+          <button className={`rounded px-4 py-2 ${!hindi ? "bg-indigo-600" : "bg-slate-700"}`} onClick={() => setEnglish(true)}>English</button>
+          <button className={`rounded px-4 py-2 ${hindi ? "bg-indigo-600" : "bg-slate-700"}`} onClick={() => sethindi(true)}>Hindi</button>
+        </div>
+        <div className="space-y-5 mt-8" aria-live="polite">
+          {messages.map((message) => (
+            <article key={message.id} className="rounded-xl bg-slate-800 p-5">
+              <p className="text-white/60">You: {message.question}</p>
+              <p className="whitespace-pre-wrap mt-3">{message.answer}</p>
+              <button className="mt-3 text-blue-300" onClick={() => playMessage(message)}>Play answer</button>
+            </article>
+          ))}
+        </div>
+      </div>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/90"><div className="max-w-3xl mx-auto"><TypingBox /></div></div>
+    </main>
   );
 };
 
