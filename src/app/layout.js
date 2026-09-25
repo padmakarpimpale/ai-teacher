@@ -1,5 +1,6 @@
 import { Noto_Sans_JP, Roboto } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 
 const roboto = Roboto({
   subsets: ["latin"],

@@ -40,3 +40,19 @@ body {
 ::-webkit-scrollbar-thumb {
   background-color: white;
 }
+/* A readable lesson layout on both the 3D board and text fallback. */
+.tutor-answer { font-size: 1.8rem; line-height: 1.5; color: #f8fafc; overflow-wrap: anywhere; }
+.tutor-answer > * { margin-top: 0.8em; }
+.tutor-answer h1, .tutor-answer h2, .tutor-answer h3 { font-weight: 700; color: #e0f2fe; line-height: 1.25; }
+.tutor-answer h1 { font-size: 1.35em; }
+.tutor-answer h2, .tutor-answer h3 { font-size: 1.15em; }
+.tutor-answer ol, .tutor-answer ul { padding-left: 1.5em; }
+.tutor-answer ol { list-style: decimal; }
+.tutor-answer ul { list-style: disc; }
+.tutor-answer li { margin: 0.3em 0; }
+.tutor-answer strong { color: #fff; }
+.tutor-answer .katex-display { overflow-x: auto; overflow-y: hidden; padding: 0.35em 0; margin: 0.8em 0; text-align: center; }
+.tutor-answer .katex { color: #fff; }
+.tutor-answer code { background: rgb(15 23 42 / 75%); padding: 0.1em 0.3em; border-radius: 0.2em; }
+.tutor-answer pre { overflow-x: auto; padding: 0.7em; background: rgb(15 23 42 / 75%); }
+@media (max-width: 700px) { .tutor-answer { font-size: 1rem; } }
