@@ -26,13 +26,13 @@ export const BoardSettings = () => {
               teacher === sensei ? "bg-white/80" : "bg-white/40"
             }`}
           >
-            <div onClick={() => setTeacher(sensei)}>
+            <button type="button" onClick={() => setTeacher(sensei)} aria-label={`Choose ${sensei}`}>
               <img
                 src={`/images/${sensei}.jpg`}
                 alt={sensei}
                 className="object-cover w-40 h-40"
               />
-            </div>
+            </button>
             <h2 className="text-3xl font-bold mt-3 text-center">{sensei}</h2>
           </div>
         ))}
@@ -88,9 +88,9 @@ export const BoardSettings = () => {
               ? "text-white bg-slate-900/40 "
               : "text-white/45 bg-slate-700/20 "
           } py-4 px-10 text-4xl rounded-full transition-colors duration-500 backdrop-blur-md`}
-          onClick={() => sethindi(!hindi)}
+          onClick={() => sethindi(true)}
         >
-          hindi
+          Hindi
         </button>
         <button
           className={`${
@@ -98,7 +98,7 @@ export const BoardSettings = () => {
               ? "text-white bg-slate-900/40 "
               : "text-white/45 bg-slate-700/20 "
           } py-4 px-10 text-4xl rounded-full transition-colors duration-500 backdrop-blur-md`}
-          onClick={() => setEnglish(!english)}
+          onClick={() => setEnglish(true)}
         >
           English
         </button>
