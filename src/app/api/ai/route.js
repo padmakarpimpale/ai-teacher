@@ -31,7 +31,11 @@ export async function POST(req) {
     if (!upstream.ok) {
       const detail = await upstream.text();
       console.error("Gemini failed", upstream.status, detail);
-      const reason = upstream.status === 429 ? "The Gemini quota is exhausted. Try again later or check billing." :
+      const invalidKey = /API_KEY_INVALID|API key not valid|API key expired|API key was reported as leaked|API key has been revoked/i.test(detail);
+      const restrictedKey = /API_KEY_SERVICE_BLOCKED|API key not allowed|API has not been used|API is disabled/i.test(detail);
+      const reason = invalidKey ? "The Gemini API key in Vercel is invalid, expired, or revoked. Replace it and redeploy." :
+        restrictedKey ? "The Gemini API key is restricted from this service. Check its API restrictions." :
+        upstream.status === 429 ? "The Gemini quota is exhausted. Try again later or check billing." :
         upstream.status === 404 ? `The configured Gemini model (${model}) is unavailable for this key.` :
         upstream.status === 400 || upstream.status === 401 || upstream.status === 403 ? `Gemini rejected the request (HTTP ${upstream.status}). Check the API key and model access in Vercel.` :
         `Gemini returned HTTP ${upstream.status}. Check the Vercel function logs.`;
