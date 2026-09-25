@@ -1,6 +1,6 @@
 # AI Tutor
 
-An interactive 3D tutor built with Next.js, React Three Fiber and Gemini. Ask a question in English or Hindi, view the response on the classroom board, and play it with your browser's speech synthesis. Choose between two teacher avatars, classroom scenes, and formal or casual answers.
+An interactive 3D tutor built with Next.js, React Three Fiber and Gemini. Ask a question in English or Hindi, view the response on the classroom board, and play it with your browser's speech synthesis. Choose between two teacher avatars, classroom scenes, and formal or casual answers. Browsers without WebGL receive a usable text view.
 
 **Live site:** https://aiteacher-eight.vercel.app/
 
@@ -44,6 +44,6 @@ The Next.js route calls Gemini from the server, keeping the API key out of the b
 
 - **The page loads, but questions fail:** Confirm the Vercel environment variable name is exactly `GEMINI_API_KEY`, redeploy after changes, and inspect function logs for model access or quota errors.
 - **No speech:** Check device volume and browser speech support; try the play button after an answer. Hindi voice availability depends on the operating system.
-- **3D scene does not appear:** Try a browser with WebGL enabled and inspect its console. The large GLB scene assets may load slowly on weaker connections.
+- **3D scene does not appear:** The text view remains usable when WebGL is disabled. Try a browser with WebGL enabled for the 3D classroom. The large GLB scene assets may load slowly on weaker connections.
 
 This is a prototype. It has no authentication or per-user rate limits; add both before sharing broadly with a paid API key.
