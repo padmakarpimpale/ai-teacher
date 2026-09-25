@@ -176,8 +176,6 @@ import { useEffect, useRef, useState } from "react";
 import { MathUtils, MeshStandardMaterial } from "three";
 import { randInt } from "three/src/math/MathUtils";
 
-// New Import for Audio Playback
-import useSpeechSynthesis from "@/hooks/useSpeechSynthesis"; 
 
 const ANIMATION_FADE_TIME = 0.5;
 
@@ -203,8 +201,6 @@ export function Teacher({ teacher, ...props }) {
 
   const [blink, setBlink] = useState(false);
 
-  // New Hook for Speech Synthesis
-  const { speak } = useSpeechSynthesis();
 
   // Blinking Effect
   useEffect(() => {
@@ -228,12 +224,10 @@ export function Teacher({ teacher, ...props }) {
     } else if (currentMessage) {
       setAnimation(randInt(0, 1) ? "Talking" : "Talking2");
 
-      // New Feature: Trigger Voice Assistant
-      speak(currentMessage.text);  // Trigger TTS for new messages
     } else {
       setAnimation("Idle");
     }
-  }, [currentMessage, loading, speak]);
+  }, [currentMessage, loading]);
 
   useFrame(() => {
     lerpMorphTarget("mouthSmile", 0.2, 0.5);
@@ -243,14 +237,8 @@ export function Teacher({ teacher, ...props }) {
       lerpMorphTarget(i, 0, 0.1); 
     }
 
-    if (currentMessage?.visemes && currentMessage?.audioPlayer) {
-      for (let i = currentMessage.visemes.length - 1; i >= 0; i--) {
-        const viseme = currentMessage.visemes[i];
-        if (currentMessage.audioPlayer.currentTime * 1000 >= viseme[0]) {
-          lerpMorphTarget(viseme[1], 1, 0.2);
-          break;
-        }
-      }
+    if (currentMessage && actions[animation]) {
+      lerpMorphTarget("mouthSmile", 0.5, 0.2);
       if (
         actions[animation].time >
         actions[animation].getClip().duration - ANIMATION_FADE_TIME
