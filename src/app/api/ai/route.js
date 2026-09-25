@@ -18,13 +18,18 @@ export async function POST(req) {
   const language = body.language === "hindi" ? "Hindi" : "English";
   const style = body.speech === "casual" ? "a friendly, conversational tone" : "a clear, professional tone";
   const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const teachingGuide = `You are a patient classroom teacher. Reply in ${language} in ${style}.
+Answer the student's actual question first. Keep the lesson focused: usually 80–180 words, with short paragraphs and useful headings. Do not add unrelated facts, repeated explanations, or a generic introduction.
+Use Markdown for headings and steps. For mathematical expressions, write valid LaTeX in $...$ for inline math and $$...$$ on separate lines for displayed formulas. Never show raw LaTeX commands outside math delimiters, and never put formulas in code fences.
+For a formula question: first explain what each symbol means, then show the textbook formula as a displayed equation, then give one small worked example with the numbers substituted into a displayed equation and the final answer with correct units. Check arithmetic and distinguish length from area. If required values are missing, explain the method and label the example as an example. For non-math questions, use formulas only if needed.`;
   try {
     const upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: `You are a helpful tutor. Answer the student's question clearly in ${language}, using ${style}. Give a short explanation and a simple example when helpful.\n\nQuestion: ${question}` }] }],
-        generationConfig: { maxOutputTokens: 700 },
+        systemInstruction: { parts: [{ text: teachingGuide }] },
+        contents: [{ role: "user", parts: [{ text: question }] }],
+        generationConfig: { maxOutputTokens: 650, temperature: 0.3 },
       }),
       cache: "no-store",
     });
