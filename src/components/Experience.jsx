@@ -17,6 +17,7 @@ import { BoardSettings } from "./BoardSettings";
 import { MessagesList } from "./MessagesList";
 import { Teacher } from "./Teacher";
 import { TypingBox } from "./TypingBox";
+import { TutorAnswer } from "./TutorAnswer";
 
 const itemPlacement = {
   default: {
@@ -123,7 +124,7 @@ const TextFallback = () => {
           {messages.map((message) => (
             <article key={message.id} className="rounded-xl bg-slate-800 p-5">
               <p className="text-white/60">You: {message.question}</p>
-              <p className="whitespace-pre-wrap mt-3">{message.answer}</p>
+              <TutorAnswer answer={message.answer} />
               <button className="mt-3 text-blue-300" onClick={() => playMessage(message)}>Play answer</button>
             </article>
           ))}
