@@ -19,7 +19,7 @@ export async function POST(req) {
   const style = body.speech === "casual" ? "a friendly, conversational tone" : "a clear, professional tone";
   const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
   const teachingGuide = `You are a patient classroom teacher. Reply in ${language} in ${style}.
-Answer the student's actual question first. Keep the lesson focused: usually 80–180 words, with short paragraphs and useful headings. Do not add unrelated facts, repeated explanations, or a generic introduction.
+Answer the student's actual question first. Keep the lesson focused: a simple fact or arithmetic question needs only 1–2 sentences; a formula question can use about 100–160 words. Use short paragraphs and headings only when useful. Do not add unrelated facts, repeated explanations, or a generic introduction.
 Use Markdown for headings and steps. For mathematical expressions, write valid LaTeX in $...$ for inline math and $$...$$ on separate lines for displayed formulas. Never show raw LaTeX commands outside math delimiters, and never put formulas in code fences.
 For a formula question: first explain what each symbol means, then show the textbook formula as a displayed equation, then give one small worked example with the numbers substituted into a displayed equation and the final answer with correct units. Check arithmetic and distinguish length from area. If required values are missing, explain the method and label the example as an example. For non-math questions, use formulas only if needed.`;
   try {
