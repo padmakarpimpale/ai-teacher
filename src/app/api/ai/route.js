@@ -29,8 +29,13 @@ export async function POST(req) {
       cache: "no-store",
     });
     if (!upstream.ok) {
-      console.error("Gemini failed", upstream.status, await upstream.text());
-      return Response.json({ error: "AI service failed. Check API key, model access, and quota." }, { status: 502 });
+      const detail = await upstream.text();
+      console.error("Gemini failed", upstream.status, detail);
+      const reason = upstream.status === 429 ? "The Gemini quota is exhausted. Try again later or check billing." :
+        upstream.status === 404 ? `The configured Gemini model (${model}) is unavailable for this key.` :
+        upstream.status === 400 || upstream.status === 401 || upstream.status === 403 ? "Gemini rejected the API key or model access. Check the Vercel key and model settings." :
+        `Gemini returned HTTP ${upstream.status}. Check the Vercel function logs.`;
+      return Response.json({ error: reason }, { status: 502 });
     }
     const data = await upstream.json();
     const answer = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
