@@ -33,7 +33,7 @@ export async function POST(req) {
       console.error("Gemini failed", upstream.status, detail);
       const reason = upstream.status === 429 ? "The Gemini quota is exhausted. Try again later or check billing." :
         upstream.status === 404 ? `The configured Gemini model (${model}) is unavailable for this key.` :
-        upstream.status === 400 || upstream.status === 401 || upstream.status === 403 ? "Gemini rejected the API key or model access. Check the Vercel key and model settings." :
+        upstream.status === 400 || upstream.status === 401 || upstream.status === 403 ? `Gemini rejected the request (HTTP ${upstream.status}). Check the API key and model access in Vercel.` :
         `Gemini returned HTTP ${upstream.status}. Check the Vercel function logs.`;
       return Response.json({ error: reason }, { status: 502 });
     }
