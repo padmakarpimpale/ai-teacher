@@ -20,7 +20,7 @@ if (!API_KEY) {
   console.error("❌ ERROR: Google Gemini API key is missing. Set it in .env.local");
 }
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = API_KEY ? new GoogleGenerativeAI(API_KEY) : null;
 
 export async function POST(req) {  
   try {
@@ -32,12 +32,10 @@ export async function POST(req) {
       return new Response(JSON.stringify({ error: "Question is required" }), { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    if (!genAI) return Response.json({ error: "Set GEMINI_API_KEY in Vercel project settings." }, { status: 503 });
+    const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-3.8-flash" });
 
-    let prompt = question;
-    if (language === "hindi") {
-      prompt = `Translate this response to Hindi: ${question}`;
-    }
+    let prompt = `You are a helpful teacher. Answer clearly in ${language === "hindi" ? "Hindi" : "English"}. Question: ${question}`;
 
     const result = await model.generateContent(prompt);
     console.log("🔹 Raw API Response:", result);
@@ -53,8 +51,7 @@ export async function POST(req) {
 
   } catch (error) {
     console.error("❌ Gemini API Error:", error);
-    return new Response(JSON.stringify({ error: "Error generating response" }), { status: 500 });
+    return Response.json({ error: "AI request failed. Check the API key, model access, and quota." }, { status: 502 });
   }
 }
-
 
