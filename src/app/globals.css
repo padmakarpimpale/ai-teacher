@@ -41,7 +41,7 @@ body {
   background-color: white;
 }
 /* A readable lesson layout on both the 3D board and text fallback. */
-.tutor-answer { font-size: 1.8rem; line-height: 1.5; color: #f8fafc; overflow-wrap: anywhere; }
+.tutor-answer { font-size: 2rem; line-height: 1.5; color: #f8fafc; overflow-wrap: anywhere; }
 .tutor-answer > * { margin-top: 0.8em; }
 .tutor-answer h1, .tutor-answer h2, .tutor-answer h3 { font-weight: 700; color: #e0f2fe; line-height: 1.25; }
 .tutor-answer h1 { font-size: 1.35em; }
