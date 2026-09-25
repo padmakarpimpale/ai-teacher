@@ -4,6 +4,7 @@ import { useState } from "react";
 export const TypingBox = () => {
   const askAI = useAITeacher((state) => state.askAI);
   const loading = useAITeacher((state) => state.loading);
+  const error = useAITeacher((state) => state.error);
   const [question, setQuestion] = useState("");
 
   const ask = () => {
@@ -20,6 +21,8 @@ export const TypingBox = () => {
         Type your question below, and AI Tutor will guide you with the best answer.
         </p>
       </div>
+
+      {error && <p role="alert" className="text-red-200">{error}</p>}
 
       {loading ? (
         <div className="flex justify-center items-center">

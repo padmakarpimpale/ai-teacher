@@ -1,60 +1,43 @@
+export const runtime = "nodejs";
 
-
-
-// import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// export async function GET(req) {
-//   const question = req.nextUrl.searchParams.get("question") || "What is AI?";
-//   const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-//   const result = await model.generateContent(question);
-//   return Response.json({ answer: result.response.text() });
-// }
-
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = process.env.GEMINI_API_KEY; // Explicitly fetching API key
-
-if (!API_KEY) {
-  console.error("❌ ERROR: Google Gemini API key is missing. Set it in .env.local");
-}
-
-const genAI = new GoogleGenerativeAI(API_KEY);
-
-export async function POST(req) {  
+export async function POST(req) {
+  let body;
   try {
-    const { question, language } = await req.json();
-    console.log("🔹 AI Request Received:", { question, language });
+    body = await req.json();
+  } catch {
+    return Response.json({ error: "Invalid request." }, { status: 400 });
+  }
+  const question = typeof body.question === "string" ? body.question.trim() : "";
+  if (!question || question.length > 2000) {
+    return Response.json({ error: "Enter a question under 2,000 characters." }, { status: 400 });
+  }
+  if (!process.env.GEMINI_API_KEY) {
+    return Response.json({ error: "AI service is not configured. Add GEMINI_API_KEY to Vercel." }, { status: 503 });
+  }
 
-    if (!question) {
-      console.log("❌ Error: No question received!");
-      return new Response(JSON.stringify({ error: "Question is required" }), { status: 400 });
+  const language = body.language === "hindi" ? "Hindi" : "English";
+  const style = body.speech === "casual" ? "a friendly, conversational tone" : "a clear, professional tone";
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  try {
+    const upstream = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: `You are a helpful tutor. Answer the student's question clearly in ${language}, using ${style}. Give a short explanation and a simple example when helpful.\n\nQuestion: ${question}` }] }],
+        generationConfig: { maxOutputTokens: 700 },
+      }),
+      cache: "no-store",
+    });
+    if (!upstream.ok) {
+      console.error("Gemini failed", upstream.status, await upstream.text());
+      return Response.json({ error: "AI service failed. Check API key, model access, and quota." }, { status: 502 });
     }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    let prompt = question;
-    if (language === "hindi") {
-      prompt = `Translate this response to Hindi: ${question}`;
-    }
-
-    const result = await model.generateContent(prompt);
-    console.log("🔹 Raw API Response:", result);
-
-    if (!result || !result.response || !result.response.candidates || result.response.candidates.length === 0) {
-      console.error("❌ Error: Invalid Gemini API Response!");
-      return new Response(JSON.stringify({ answer: "No response available." }), { status: 500 });
-    }
-
-    const answer = result.response.candidates[0].content.parts[0].text;
-    console.log("✅ AI Answer Generated:", answer);
+    const data = await upstream.json();
+    const answer = data.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("").trim();
+    if (!answer) return Response.json({ error: "No answer was returned. Try another question." }, { status: 502 });
     return Response.json({ answer });
-
   } catch (error) {
-    console.error("❌ Gemini API Error:", error);
-    return new Response(JSON.stringify({ error: "Error generating response" }), { status: 500 });
+    console.error("Gemini connection error", error);
+    return Response.json({ error: "Could not connect to AI service." }, { status: 502 });
   }
 }
-
-
