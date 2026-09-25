@@ -294,23 +294,24 @@ export const useAITeacher = create((set, get) => ({
   setClassroom: (classroom) => set(() => ({ classroom })),
 
   loading: false,
-  hindi: true,
-  sethindi: (hindi) => set(() => ({ hindi })),
+  hindi: false,
+  sethindi: (hindi) => set(() => ({ hindi, english: !hindi })),
 
   english: true,
-  setEnglish: (english) => set(() => ({ english })),
+  setEnglish: (english) => set(() => ({ english, hindi: !english })),
 
   speech: "formal",
+  error: null,
   setSpeech: (speech) => set(() => ({ speech })),
 
   // ================== ASK AI ==================
   askAI: async (question) => {
-    if (!question) return;
+    if (!question?.trim()) return;
 
     console.log("🔹 Sending AI Request:", question);
 
     const message = { question, id: get().messages.length };
-    set(() => ({ loading: true }));
+    set(() => ({ loading: true, error: null }));
 
     try {
         const language = get().hindi ? "hindi" : "english";
@@ -343,7 +344,7 @@ export const useAITeacher = create((set, get) => ({
         get().playMessage(message);
     } catch (error) {
         console.error("❌ Error in askAI:", error);
-        set(() => ({ loading: false }));
+        set(() => ({ loading: false, error: error.message }));
     }
 },
 
@@ -526,6 +527,16 @@ export const useAITeacher = create((set, get) => ({
 // },
  
 playMessage: async (message) => {
+  if (typeof window !== "undefined" && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(message.answer);
+    utterance.lang = message.language === "hindi" ? "hi-IN" : "en-US";
+    utterance.onend = () => set({ currentMessage: null });
+    utterance.onerror = () => set({ currentMessage: null });
+    set({ currentMessage: message });
+    window.speechSynthesis.speak(utterance);
+  }
+  return;
   set(() => ({ currentMessage: message }));
 
   const isEnglish = get().english;
@@ -596,6 +607,9 @@ playMessage: async (message) => {
 
   // ================== STOP MESSAGE ==================
   stopMessage: (message) => {
+    if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+    set({ currentMessage: null });
+    return;
     try {
       if (message.audioPlayer instanceof Audio) {
         message.audioPlayer.pause();
